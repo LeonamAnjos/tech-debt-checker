@@ -1,11 +1,14 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: "tech-debt-checker"
+description: "Check for tech-debts created/removed"
 inputs:
-  milliseconds: # change this
+  repo-token:
+    description: "Github token secret"
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+  strict:
+    description: "Should block pr if threshold not pass?"
+  threshold:
+    description: "Maximum number of new tech-debts that can be added"
+    default: 0
 runs:
-  using: 'node16'
-  main: 'dist/index.js'
+  using: "node16"
+  main: "dist/index.js"
