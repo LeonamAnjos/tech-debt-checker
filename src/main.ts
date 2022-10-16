@@ -5,6 +5,12 @@ async function run(): Promise<void> {
   try {
     const threshold: string = core.getInput("threshold");
     const strict: string = core.getInput("strict");
+
+    core.debug(`GITHUB_BASE_REF: ${core.getInput("GITHUB_BASE_REF")}`);
+    core.debug(`GITHUB_HEAD_REF: ${core.getInput("GITHUB_HEAD_REF")}`);
+    core.debug(`GITHUB_REF: ${core.getInput("GITHUB_REF")}`);
+    core.debug(`GITHUB_SHA: ${core.getInput("GITHUB_SHA")}`);
+
     core.debug(`Threshold: ${threshold}`);
     core.debug(`Strict: ${strict}`);
 
