@@ -1,6 +1,87 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 641:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.crawl = void 0;
+const core = __importStar(__nccwpck_require__(186));
+const child_process_1 = __nccwpck_require__(129);
+const refNames = ["refs/heads/master", "HEAD"];
+const configs = ["error", "todo", "import"];
+const revParseCommand = (refName) => `git rev-parse ${refName}`;
+const grepCommand = (predicate, gitSha) => `git grep -E '${predicate}' ${gitSha} | wc -l`;
+const execute = (command) => {
+    return new Promise((resolve, reject) => {
+        (0, child_process_1.exec)(command, (error, stdout) => {
+            if (error)
+                reject(error);
+            resolve(stdout.trim());
+        });
+    });
+};
+const crawl = () => __awaiter(void 0, void 0, void 0, function* () {
+    const gitSha = yield Promise.all([
+        execute(revParseCommand(refNames[0])),
+        execute(revParseCommand(refNames[1]))
+    ]);
+    core.debug(`gitSha: ${gitSha}`);
+    const commands = [
+        configs.map((config) => grepCommand(config, gitSha[0])),
+        configs.map((config) => grepCommand(config, gitSha[1]))
+    ];
+    core.debug(`Commands: ${commands}`);
+    const result = yield Promise.all([
+        Promise.all(configs
+            .map((config) => grepCommand(config, gitSha[0]))
+            .map(execute)),
+        Promise.all(configs
+            .map((config) => grepCommand(config, gitSha[1]))
+            .map(execute))
+    ]);
+    core.debug(`Crawler results: ${result}`);
+    return result;
+});
+exports.crawl = crawl;
+
+
+/***/ }),
+
 /***/ 109:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -40,18 +121,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
-const wait_1 = __nccwpck_require__(817);
+const crawler_1 = __nccwpck_require__(641);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const threshold = core.getInput('threshold');
-            const strict = core.getInput('strict');
-            core.debug(`Threshold: ${threshold}`);
-            core.debug(`Strict: ${strict}`);
-            core.debug(new Date().toTimeString());
-            yield (0, wait_1.wait)(parseInt(threshold, 10));
-            core.debug(new Date().toTimeString());
-            core.setOutput('time', new Date().toTimeString());
+            const threshold = core.getInput("threshold");
+            const strict = core.getInput("strict");
+            core.info(`GITHUB_BASE_REF: ${core.getInput("GITHUB_BASE_REF")}`);
+            core.info(`GITHUB_HEAD_REF: ${core.getInput("GITHUB_HEAD_REF")}`);
+            core.info(`GITHUB_REF: ${core.getInput("GITHUB_REF")}`);
+            core.info(`GITHUB_SHA: ${core.getInput("GITHUB_SHA")}`);
+            core.info(`Threshold: ${threshold}`);
+            core.info(`Strict: ${strict}`);
+            const result = yield (0, crawler_1.crawl)();
+            core.setOutput("Crawler", `${result}`);
+            // core.setOutput("time", new Date().toTimeString());
         }
         catch (error) {
             if (error instanceof Error)
@@ -60,37 +144,6 @@ function run() {
     });
 }
 run();
-
-
-/***/ }),
-
-/***/ 817:
-/***/ (function(__unused_webpack_module, exports) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.wait = void 0;
-function wait(milliseconds) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise(resolve => {
-            if (isNaN(milliseconds)) {
-                throw new Error('milliseconds not a number');
-            }
-            setTimeout(() => resolve('done!'), milliseconds);
-        });
-    });
-}
-exports.wait = wait;
 
 
 /***/ }),
@@ -2787,6 +2840,14 @@ exports.default = _default;
 
 "use strict";
 module.exports = require("assert");
+
+/***/ }),
+
+/***/ 129:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("child_process");
 
 /***/ }),
 
