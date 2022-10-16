@@ -8,7 +8,7 @@ inputs:
     description: "Should block pr if threshold not pass?"
   threshold:
     description: "Maximum number of new tech-debts that can be added"
-    default: 0
+    default: "0"
 runs:
   using: "node16"
   main: "dist/index.js"
