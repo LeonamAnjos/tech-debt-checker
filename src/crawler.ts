@@ -10,6 +10,7 @@ const grepCommand = (predicate: string, gitSha: string): string =>
 
 const execute = (command: string): Promise<string> => {
   return new Promise<string>((resolve, reject) => {
+    core.info(`[Exec] ${command}`);
     exec(command, (error, stdout) => {
       if (error) reject(error);
 
@@ -26,13 +27,6 @@ const crawl = async (): Promise<string[][]> => {
 
   core.debug(`gitSha: ${gitSha}`);
 
-  const commands = [
-    configs.map((config: string) => grepCommand(config, gitSha[0])),
-    configs.map((config: string) => grepCommand(config, gitSha[1]))
-  ];
-
-  core.debug(`Commands: ${commands}`);
-
   const result: string[][] = await Promise.all([
     Promise.all(
       configs
@@ -46,12 +40,9 @@ const crawl = async (): Promise<string[][]> => {
     )
   ]);
 
-  core.debug(`Crawler results: ${result}`);
+  core.info(`Crawler results: ${result}`);
 
   return result;
 };
 
 export {crawl};
-
-//git grep -E 'TODO' 55bf2ccaa086ed9e7e2607b552384c1bc2d344d0 | wc -l
-//git grep -E 'TODO' 73b84cc2a7cb9b1ba382d6d9acfd086b1aa81feb | wc -l
