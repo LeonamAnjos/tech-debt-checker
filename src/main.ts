@@ -7,10 +7,19 @@ async function run(): Promise<void> {
     const threshold: string = core.getInput("threshold");
     const strict: string = core.getInput("strict");
 
-    core.info(`GITHUB_BASE_REF: ${process.env["GITHUB_BASE_REF"]}`);
-    core.info(`GITHUB_HEAD_REF: ${process.env["GITHUB_HEAD_REF"]}`);
-    core.info(`GITHUB_REF: ${process.env["GITHUB_REF"]}`);
+    // core.info(`GITHUB_BASE_REF: ${process.env["GITHUB_BASE_REF"]}`);
+    // core.info(`GITHUB_HEAD_REF: ${process.env["GITHUB_HEAD_REF"]}`);
+    // core.info(`GITHUB_REF: ${process.env["GITHUB_REF"]}`);
+
     core.info(`GITHUB_SHA: ${process.env["GITHUB_SHA"]}`);
+    core.info(`${github.context.sha}: github.context.sha`);
+    core.info(`${github.context.payload.pull_request}: github.context.sha`);
+    core.info(
+      `${github.context.payload["after"]}: github.context.payload["after"]`
+    );
+    core.info(
+      `${github.context.payload["before"]}: github.context.payload["before"]`
+    );
 
     core.info(JSON.stringify(github.context, null, 2));
 

@@ -1,7 +1,7 @@
 import * as core from "@actions/core";
 import {exec} from "child_process";
 
-const refNames = ["refs/heads/master", "HEAD"];
+const refNames = ["origin/master", "HEAD"];
 const configs = ["error", "todo", "import"];
 
 const revParseCommand = (refName: string): string => `git rev-parse ${refName}`;
@@ -52,3 +52,6 @@ const crawl = async (): Promise<string[][]> => {
 };
 
 export {crawl};
+
+//git grep -E 'TODO' 55bf2ccaa086ed9e7e2607b552384c1bc2d344d0 | wc -l
+//git grep -E 'TODO' 73b84cc2a7cb9b1ba382d6d9acfd086b1aa81feb | wc -l

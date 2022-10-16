@@ -42,7 +42,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.crawl = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const child_process_1 = __nccwpck_require__(3129);
-const refNames = ["refs/heads/master", "HEAD"];
+const refNames = ["origin/master", "HEAD"];
 const configs = ["error", "todo", "import"];
 const revParseCommand = (refName) => `git rev-parse ${refName}`;
 const grepCommand = (predicate, gitSha) => `git grep -E '${predicate}' ${gitSha} | wc -l`;
@@ -78,6 +78,8 @@ const crawl = () => __awaiter(void 0, void 0, void 0, function* () {
     return result;
 });
 exports.crawl = crawl;
+//git grep -E 'TODO' 55bf2ccaa086ed9e7e2607b552384c1bc2d344d0 | wc -l
+//git grep -E 'TODO' 73b84cc2a7cb9b1ba382d6d9acfd086b1aa81feb | wc -l
 
 
 /***/ }),
@@ -128,10 +130,14 @@ function run() {
         try {
             const threshold = core.getInput("threshold");
             const strict = core.getInput("strict");
-            core.info(`GITHUB_BASE_REF: ${process.env["GITHUB_BASE_REF"]}`);
-            core.info(`GITHUB_HEAD_REF: ${process.env["GITHUB_HEAD_REF"]}`);
-            core.info(`GITHUB_REF: ${process.env["GITHUB_REF"]}`);
+            // core.info(`GITHUB_BASE_REF: ${process.env["GITHUB_BASE_REF"]}`);
+            // core.info(`GITHUB_HEAD_REF: ${process.env["GITHUB_HEAD_REF"]}`);
+            // core.info(`GITHUB_REF: ${process.env["GITHUB_REF"]}`);
             core.info(`GITHUB_SHA: ${process.env["GITHUB_SHA"]}`);
+            core.info(`${github.context.sha}: github.context.sha`);
+            core.info(`${github.context.payload.pull_request}: github.context.sha`);
+            core.info(`${github.context.payload["after"]}: github.context.payload["after"]`);
+            core.info(`${github.context.payload["before"]}: github.context.payload["before"]`);
             core.info(JSON.stringify(github.context, null, 2));
             core.info(`Threshold: ${threshold}`);
             core.info(`Strict: ${strict}`);
