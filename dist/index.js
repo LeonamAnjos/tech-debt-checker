@@ -142,6 +142,7 @@ function run() {
             core.info(`Threshold: ${threshold}`);
             core.info(`Strict: ${strict}`);
             const result = yield (0, crawler_1.crawl)();
+            core.info(`Strict: ${result}`);
             core.setOutput("Crawler", `${result}`);
             // core.setOutput("time", new Date().toTimeString());
         }

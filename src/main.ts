@@ -28,6 +28,7 @@ async function run(): Promise<void> {
 
     const result = await crawl();
 
+    core.info(`Strict: ${result}`);
     core.setOutput("Crawler", `${result}`);
 
     // core.setOutput("time", new Date().toTimeString());
