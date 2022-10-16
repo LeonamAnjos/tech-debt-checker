@@ -58,7 +58,7 @@ const execute = (command) => {
 };
 const crawl = () => __awaiter(void 0, void 0, void 0, function* () {
     const gitSha = yield Promise.all([
-        execute(revParseCommand(refNames[0])),
+        execute(revParseCommand(refNames[1])),
         execute(revParseCommand(refNames[1]))
     ]);
     core.debug(`gitSha: ${gitSha}`);
@@ -123,6 +123,8 @@ function run() {
         try {
             const threshold = core.getInput("threshold");
             const strict = core.getInput("strict");
+            core.debug(`refs/remotes/origin/${process.env.GITHUB_BASE_REF} vs refs/remotes/origin/${process.env.GITHUB_HEAD_REF}`);
+            core.debug(`Env: ${process.env}`);
             core.debug(`Threshold: ${threshold}`);
             core.debug(`Strict: ${strict}`);
             const result = yield (0, crawler_1.crawl)();

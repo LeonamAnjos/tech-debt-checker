@@ -21,7 +21,7 @@ const execute = (command: string): Promise<string> => {
 
 const crawl = async (): Promise<string[][]> => {
   const gitSha = await Promise.all([
-    execute(revParseCommand(refNames[0])),
+    execute(revParseCommand(refNames[1])),
     execute(revParseCommand(refNames[1]))
   ]);
 

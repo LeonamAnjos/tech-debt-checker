@@ -6,6 +6,10 @@ async function run(): Promise<void> {
     const threshold: string = core.getInput("threshold");
     const strict: string = core.getInput("strict");
 
+    core.debug(
+      `refs/remotes/origin/${process.env.GITHUB_BASE_REF} vs refs/remotes/origin/${process.env.GITHUB_HEAD_REF}`
+    );
+    core.debug(`Env: ${process.env}`);
     core.debug(`Threshold: ${threshold}`);
     core.debug(`Strict: ${strict}`);
 
