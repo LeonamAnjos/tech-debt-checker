@@ -1,4 +1,5 @@
 import * as core from "@actions/core";
+import * as github from "@actions/github";
 import {crawl} from "./crawler";
 
 async function run(): Promise<void> {
@@ -6,10 +7,13 @@ async function run(): Promise<void> {
     const threshold: string = core.getInput("threshold");
     const strict: string = core.getInput("strict");
 
-    core.info(`GITHUB_BASE_REF: ${core.getInput("GITHUB_BASE_REF")}`);
-    core.info(`GITHUB_HEAD_REF: ${core.getInput("GITHUB_HEAD_REF")}`);
-    core.info(`GITHUB_REF: ${core.getInput("GITHUB_REF")}`);
-    core.info(`GITHUB_SHA: ${core.getInput("GITHUB_SHA")}`);
+    core.info(`GITHUB_BASE_REF: ${process.env["GITHUB_BASE_REF"]}`);
+    core.info(`GITHUB_HEAD_REF: ${process.env["GITHUB_HEAD_REF"]}`);
+    core.info(`GITHUB_REF: ${process.env["GITHUB_REF"]}`);
+    core.info(`GITHUB_SHA: ${process.env["GITHUB_SHA"]}`);
+
+    core.info(JSON.stringify(github.context, null, 2));
+
     core.info(`Threshold: ${threshold}`);
     core.info(`Strict: ${strict}`);
 
