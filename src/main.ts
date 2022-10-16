@@ -1,5 +1,5 @@
 import * as core from "@actions/core";
-import {wait} from "./wait";
+import {crawl} from "./crawler";
 
 async function run(): Promise<void> {
   try {
@@ -8,11 +8,11 @@ async function run(): Promise<void> {
     core.debug(`Threshold: ${threshold}`);
     core.debug(`Strict: ${strict}`);
 
-    core.debug(new Date().toTimeString());
-    await wait(parseInt(threshold, 10));
-    core.debug(new Date().toTimeString());
+    const result = await crawl();
 
-    core.setOutput("time", new Date().toTimeString());
+    core.setOutput("Crawler", `${result}`);
+
+    // core.setOutput("time", new Date().toTimeString());
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message);
   }
