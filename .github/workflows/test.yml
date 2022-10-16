@@ -22,4 +22,4 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           strict: true
-          threshold: 30
+          threshold: "30"
