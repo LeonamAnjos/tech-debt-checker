@@ -115,17 +115,15 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
 const crawler_1 = __nccwpck_require__(641);
 function run() {
-    var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const threshold = core.getInput("threshold");
             const strict = core.getInput("strict");
             core.debug(`refs/remotes/origin/${process.env.GITHUB_BASE_REF} vs refs/remotes/origin/${process.env.GITHUB_HEAD_REF}`);
-            //refs/remotes/origin/ vs refs/remotes/origin/
             core.debug(`Env: ${process.env}`);
             core.debug(`Threshold: ${threshold}`);
             core.debug(`Strict: ${strict}`);
-            const result = yield (0, crawler_1.crawl)((_a = process.env.GITHUB_BASE_REF) !== null && _a !== void 0 ? _a : "", (_b = process.env.GITHUB_HEAD_REF) !== null && _b !== void 0 ? _b : "");
+            const result = yield (0, crawler_1.crawl)(`refs/remotes/origin/${process.env.GITHUB_BASE_REF}`, `refs/remotes/origin/${process.env.GITHUB_HED_REF}`);
             core.debug(`Strict: ${result}`);
             core.setOutput("Crawler", `${result}`);
         }
