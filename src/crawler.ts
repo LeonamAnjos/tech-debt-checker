@@ -1,7 +1,7 @@
 import * as core from "@actions/core";
 import {exec} from "child_process";
 
-const refNames = ["origin/master", "HEAD"];
+const refNames = ["git rev-parse origin/master", "HEAD"];
 const configs = ["error", "todo", "import"];
 
 const revParseCommand = (refName: string): string => `git rev-parse ${refName}`;

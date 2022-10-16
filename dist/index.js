@@ -42,7 +42,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.crawl = void 0;
 const core = __importStar(__nccwpck_require__(186));
 const child_process_1 = __nccwpck_require__(129);
-const refNames = ["origin/master", "HEAD"];
+const refNames = ["git rev-parse origin/master", "HEAD"];
 const configs = ["error", "todo", "import"];
 const revParseCommand = (refName) => `git rev-parse ${refName}`;
 const grepCommand = (predicate, gitSha) => `git grep -E '${predicate}' ${gitSha} | wc -l`;
