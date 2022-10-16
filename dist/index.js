@@ -42,7 +42,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.crawl = void 0;
 const core = __importStar(__nccwpck_require__(186));
 const child_process_1 = __nccwpck_require__(129);
-const refNames = ["refs/remotes/origin/master", "HEAD"];
+const refNames = (/* unused pure expression or super */ null && (["refs/remotes/origin/master", "HEAD"]));
 const configs = ["error", "todo", "import"];
 const revParseCommand = (refName) => `git rev-parse ${refName}`;
 const grepCommand = (predicate, gitSha) => `git grep -E '${predicate}' ${gitSha} | wc -l`;
@@ -56,19 +56,15 @@ const execute = (command) => {
         });
     });
 };
-const crawl = () => __awaiter(void 0, void 0, void 0, function* () {
-    const gitSha = yield Promise.all([
-        execute(revParseCommand(refNames[1])),
-        execute(revParseCommand(refNames[1]))
-    ]);
-    core.debug(`gitSha: ${gitSha}`);
+const crawl = (base, head) => __awaiter(void 0, void 0, void 0, function* () {
+    // const gitSha = await Promise.all([
+    //   execute(revParseCommand(refNames[0])),
+    //   execute(revParseCommand(refNames[1]))
+    // ]);
+    // core.debug(`gitSha: ${gitSha}`);
     const result = yield Promise.all([
-        Promise.all(configs
-            .map((config) => grepCommand(config, gitSha[0]))
-            .map(execute)),
-        Promise.all(configs
-            .map((config) => grepCommand(config, gitSha[1]))
-            .map(execute))
+        Promise.all(configs.map((config) => grepCommand(config, base)).map(execute)),
+        Promise.all(configs.map((config) => grepCommand(config, head)).map(execute))
     ]);
     core.info(`Crawler results: ${result}`);
     return result;
@@ -119,15 +115,17 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
 const crawler_1 = __nccwpck_require__(641);
 function run() {
+    var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const threshold = core.getInput("threshold");
             const strict = core.getInput("strict");
             core.debug(`refs/remotes/origin/${process.env.GITHUB_BASE_REF} vs refs/remotes/origin/${process.env.GITHUB_HEAD_REF}`);
+            //refs/remotes/origin/ vs refs/remotes/origin/
             core.debug(`Env: ${process.env}`);
             core.debug(`Threshold: ${threshold}`);
             core.debug(`Strict: ${strict}`);
-            const result = yield (0, crawler_1.crawl)();
+            const result = yield (0, crawler_1.crawl)((_a = process.env.GITHUB_BASE_REF) !== null && _a !== void 0 ? _a : "", (_b = process.env.GITHUB_HEAD_REF) !== null && _b !== void 0 ? _b : "");
             core.debug(`Strict: ${result}`);
             core.setOutput("Crawler", `${result}`);
         }

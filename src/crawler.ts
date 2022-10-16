@@ -19,24 +19,20 @@ const execute = (command: string): Promise<string> => {
   });
 };
 
-const crawl = async (): Promise<string[][]> => {
-  const gitSha = await Promise.all([
-    execute(revParseCommand(refNames[1])),
-    execute(revParseCommand(refNames[1]))
-  ]);
+const crawl = async (base: string, head: string): Promise<string[][]> => {
+  // const gitSha = await Promise.all([
+  //   execute(revParseCommand(refNames[0])),
+  //   execute(revParseCommand(refNames[1]))
+  // ]);
 
-  core.debug(`gitSha: ${gitSha}`);
+  // core.debug(`gitSha: ${gitSha}`);
 
   const result: string[][] = await Promise.all([
     Promise.all(
-      configs
-        .map((config: string) => grepCommand(config, gitSha[0]))
-        .map(execute)
+      configs.map((config: string) => grepCommand(config, base)).map(execute)
     ),
     Promise.all(
-      configs
-        .map((config: string) => grepCommand(config, gitSha[1]))
-        .map(execute)
+      configs.map((config: string) => grepCommand(config, head)).map(execute)
     )
   ]);
 

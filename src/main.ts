@@ -9,11 +9,16 @@ async function run(): Promise<void> {
     core.debug(
       `refs/remotes/origin/${process.env.GITHUB_BASE_REF} vs refs/remotes/origin/${process.env.GITHUB_HEAD_REF}`
     );
+    //refs/remotes/origin/ vs refs/remotes/origin/
+
     core.debug(`Env: ${process.env}`);
     core.debug(`Threshold: ${threshold}`);
     core.debug(`Strict: ${strict}`);
 
-    const result = await crawl();
+    const result = await crawl(
+      process.env.GITHUB_BASE_REF ?? "",
+      process.env.GITHUB_HEAD_REF ?? ""
+    );
 
     core.debug(`Strict: ${result}`);
     core.setOutput("Crawler", `${result}`);
