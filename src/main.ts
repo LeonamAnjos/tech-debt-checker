@@ -27,3 +27,24 @@ async function run(): Promise<void> {
 }
 
 run();
+
+// async function bha(): Promise<void> {
+//   const octokit = github.getOctokit("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");
+
+//   // const {data: pullRequest} = await octokit.rest.pulls.get({
+//   //   owner: "LeonamAnjos",
+//   //   repo: "tech-debt-checker",
+//   //   pull_number: 7,
+//   //   mediaType: {
+//   //     format: "diff"
+//   //   }
+//   // });
+
+//   const data = await octokit.rest.repos.listCommits({
+//     owner: "LeonamAnjos",
+//     repo: "tech-debt-checker",
+//     ref: "refs/origin"
+//   });
+
+//   console.log(data);
+// }

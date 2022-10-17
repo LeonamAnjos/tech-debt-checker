@@ -20,12 +20,14 @@ const execute = (command: string): Promise<string> => {
 };
 
 const crawl = async (base: string, head: string): Promise<string[][]> => {
-  // const gitSha = await Promise.all([
-  //   execute(revParseCommand(refNames[0])),
-  //   execute(revParseCommand(refNames[1]))
-  // ]);
+  core.info(await execute("git show-ref"));
 
-  // core.debug(`gitSha: ${gitSha}`);
+  const gitSha = await Promise.all([
+    execute(revParseCommand(refNames[0])),
+    execute(revParseCommand(refNames[1]))
+  ]);
+
+  core.debug(`gitSha: ${gitSha}`);
 
   const result: string[][] = await Promise.all([
     Promise.all(
