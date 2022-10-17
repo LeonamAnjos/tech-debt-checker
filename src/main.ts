@@ -1,4 +1,5 @@
 import * as core from "@actions/core";
+import * as github from "@actions/github";
 import {crawl} from "./crawler";
 
 async function run(): Promise<void> {
@@ -26,25 +27,34 @@ async function run(): Promise<void> {
   }
 }
 
-run();
+// run();
 
-// async function bha(): Promise<void> {
-//   const octokit = github.getOctokit("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");
+async function bha(): Promise<void> {
+  core.info(`env: ${process.env}`);
+  core.info(`process.env.GITHUB_BASE_REF: ${process.env.GITHUB_BASE_REF}`);
+  core.info(`process.env.GITHUB_HEAD_REF: ${process.env.GITHUB_HEAD_REF}`);
 
-//   // const {data: pullRequest} = await octokit.rest.pulls.get({
-//   //   owner: "LeonamAnjos",
-//   //   repo: "tech-debt-checker",
-//   //   pull_number: 7,
-//   //   mediaType: {
-//   //     format: "diff"
-//   //   }
-//   // });
+  core.info("-----------------------------------------");
+  core.info(JSON.stringify(github.context, null, 2));
 
-//   const data = await octokit.rest.repos.listCommits({
-//     owner: "LeonamAnjos",
-//     repo: "tech-debt-checker",
-//     ref: "refs/origin"
-//   });
+  const octokit = github.getOctokit("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");
+  const {data: pullRequest} = await octokit.rest.pulls.get({
+    owner: "LeonamAnjos",
+    repo: "tech-debt-checker",
+    pull_number: 7,
+    mediaType: {
+      format: "diff"
+    }
+  });
 
-//   console.log(data);
-// }
+  // const data = await octokit.rest.git.getRef({
+  //   owner: "LeonamAnjos",
+  //   repo: "tech-debt-checker",
+  //   ref: "origin/master"
+  // });
+
+  core.info("-----------------------------------------");
+  core.info(JSON.stringify(pullRequest, null, 2));
+}
+
+bha();
