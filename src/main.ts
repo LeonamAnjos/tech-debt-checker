@@ -30,31 +30,29 @@ async function run(): Promise<void> {
 // run();
 
 async function bha(): Promise<void> {
-  core.info(`env: ${process.env}`);
+  core.info(`env: ${JSON.stringify(process.env, null, 2)}`);
+  core.info("-----------------------------------------");
+
   core.info(`process.env.GITHUB_BASE_REF: ${process.env.GITHUB_BASE_REF}`);
   core.info(`process.env.GITHUB_HEAD_REF: ${process.env.GITHUB_HEAD_REF}`);
+  core.info("-----------------------------------------");
+
+  const pullRequest = github.context.payload.pull_request;
+
+  if (!pullRequest) return;
+
+  const baseSha = pullRequest["base"]["sha"];
+  const headSha = pullRequest["head"]["sha"];
+
+  core.info(`base: ${baseSha}`);
+  core.info(`base: ${headSha}`);
+
+  core.info(`base: ${JSON.stringify(pullRequest["base"], null, 2)}`);
+  core.info(`base: ${JSON.stringify(pullRequest["head"], null, 2)}`);
 
   core.info("-----------------------------------------");
   core.info(JSON.stringify(github.context, null, 2));
-
-  const octokit = github.getOctokit("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");
-  const {data: pullRequest} = await octokit.rest.pulls.get({
-    owner: "LeonamAnjos",
-    repo: "tech-debt-checker",
-    pull_number: 7,
-    mediaType: {
-      format: "diff"
-    }
-  });
-
-  // const data = await octokit.rest.git.getRef({
-  //   owner: "LeonamAnjos",
-  //   repo: "tech-debt-checker",
-  //   ref: "origin/master"
-  // });
-
   core.info("-----------------------------------------");
-  core.info(JSON.stringify(pullRequest, null, 2));
 }
 
 bha();
