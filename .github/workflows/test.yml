@@ -23,3 +23,4 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           strict: true
           threshold: "30"
+          options: x|y|z

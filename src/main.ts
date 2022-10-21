@@ -6,53 +6,57 @@ async function run(): Promise<void> {
   try {
     const threshold: string = core.getInput("threshold");
     const strict: string = core.getInput("strict");
+    const options: string = core.getInput("options");
 
-    core.debug(
-      `refs/remotes/origin/${process.env.GITHUB_BASE_REF} vs refs/remotes/origin/${process.env.GITHUB_HEAD_REF}`
-    );
+    core.info(`Threshold: ${threshold}`);
+    core.info(`Strict: ${strict}`);
+    core.info(`Options: ${options}`);
 
-    core.debug(`Env: ${process.env}`);
-    core.debug(`Threshold: ${threshold}`);
-    core.debug(`Strict: ${strict}`);
+    const pullRequest = github.context.payload.pull_request;
 
-    const result = await crawl(
-      `refs/remotes/origin/${process.env.GITHUB_BASE_REF}`,
-      `refs/remotes/origin/${process.env.GITHUB_HED_REF}`
-    );
+    if (!pullRequest) return;
 
-    core.debug(`Strict: ${result}`);
+    const baseSha = pullRequest["base"]["sha"];
+    const headSha = pullRequest["head"]["sha"];
+
+    core.info(`base: ${baseSha}`);
+    core.info(`head: ${headSha}`);
+
+    const result = await crawl(baseSha, headSha);
+
+    core.info(`Strict: ${result}`);
     core.setOutput("Crawler", `${result}`);
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message);
   }
 }
 
-// run();
+run();
 
-async function bha(): Promise<void> {
-  core.info(`env: ${JSON.stringify(process.env, null, 2)}`);
-  core.info("-----------------------------------------");
+// async function bha(): Promise<void> {
+//   core.info(`env: ${JSON.stringify(process.env, null, 2)}`);
+//   core.info("-----------------------------------------");
 
-  core.info(`process.env.GITHUB_BASE_REF: ${process.env.GITHUB_BASE_REF}`);
-  core.info(`process.env.GITHUB_HEAD_REF: ${process.env.GITHUB_HEAD_REF}`);
-  core.info("-----------------------------------------");
+//   core.info(`process.env.GITHUB_BASE_REF: ${process.env.GITHUB_BASE_REF}`);
+//   core.info(`process.env.GITHUB_HEAD_REF: ${process.env.GITHUB_HEAD_REF}`);
+//   core.info("-----------------------------------------");
 
-  const pullRequest = github.context.payload.pull_request;
+//   const pullRequest = github.context.payload.pull_request;
 
-  if (!pullRequest) return;
+//   if (!pullRequest) return;
 
-  const baseSha = pullRequest["base"]["sha"];
-  const headSha = pullRequest["head"]["sha"];
+//   const baseSha = pullRequest["base"]["sha"];
+//   const headSha = pullRequest["head"]["sha"];
 
-  core.info(`base: ${baseSha}`);
-  core.info(`base: ${headSha}`);
+//   core.info(`base: ${baseSha}`);
+//   core.info(`head: ${headSha}`);
 
-  core.info(`base: ${JSON.stringify(pullRequest["base"], null, 2)}`);
-  core.info(`base: ${JSON.stringify(pullRequest["head"], null, 2)}`);
+//   core.info(`base: ${JSON.stringify(pullRequest["base"], null, 2)}`);
+//   core.info(`head: ${JSON.stringify(pullRequest["head"], null, 2)}`);
 
-  core.info("-----------------------------------------");
-  core.info(JSON.stringify(github.context, null, 2));
-  core.info("-----------------------------------------");
-}
+//   core.info("-----------------------------------------");
+//   core.info(JSON.stringify(github.context, null, 2));
+//   core.info("-----------------------------------------");
+// }
 
-bha();
+// bha();

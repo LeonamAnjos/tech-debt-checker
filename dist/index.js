@@ -121,12 +121,19 @@ function run() {
         try {
             const threshold = core.getInput("threshold");
             const strict = core.getInput("strict");
-            core.debug(`refs/remotes/origin/${process.env.GITHUB_BASE_REF} vs refs/remotes/origin/${process.env.GITHUB_HEAD_REF}`);
-            core.debug(`Env: ${process.env}`);
-            core.debug(`Threshold: ${threshold}`);
-            core.debug(`Strict: ${strict}`);
-            const result = yield (0, crawler_1.crawl)(`refs/remotes/origin/${process.env.GITHUB_BASE_REF}`, `refs/remotes/origin/${process.env.GITHUB_HED_REF}`);
-            core.debug(`Strict: ${result}`);
+            const options = core.getInput("options");
+            core.info(`Threshold: ${threshold}`);
+            core.info(`Strict: ${strict}`);
+            core.info(`Options: ${options}`);
+            const pullRequest = github.context.payload.pull_request;
+            if (!pullRequest)
+                return;
+            const baseSha = pullRequest["base"]["sha"];
+            const headSha = pullRequest["head"]["sha"];
+            core.info(`base: ${baseSha}`);
+            core.info(`head: ${headSha}`);
+            const result = yield (0, crawler_1.crawl)(baseSha, headSha);
+            core.info(`Strict: ${result}`);
             core.setOutput("Crawler", `${result}`);
         }
         catch (error) {
@@ -135,29 +142,26 @@ function run() {
         }
     });
 }
-// run();
-function bha() {
-    return __awaiter(this, void 0, void 0, function* () {
-        core.info(`env: ${JSON.stringify(process.env, null, 2)}`);
-        core.info("-----------------------------------------");
-        core.info(`process.env.GITHUB_BASE_REF: ${process.env.GITHUB_BASE_REF}`);
-        core.info(`process.env.GITHUB_HEAD_REF: ${process.env.GITHUB_HEAD_REF}`);
-        core.info("-----------------------------------------");
-        const pullRequest = github.context.payload.pull_request;
-        if (!pullRequest)
-            return;
-        const baseSha = pullRequest["base"]["sha"];
-        const headSha = pullRequest["head"]["sha"];
-        core.info(`base: ${baseSha}`);
-        core.info(`base: ${headSha}`);
-        core.info(`base: ${JSON.stringify(pullRequest["base"], null, 2)}`);
-        core.info(`base: ${JSON.stringify(pullRequest["head"], null, 2)}`);
-        core.info("-----------------------------------------");
-        core.info(JSON.stringify(github.context, null, 2));
-        core.info("-----------------------------------------");
-    });
-}
-bha();
+run();
+// async function bha(): Promise<void> {
+//   core.info(`env: ${JSON.stringify(process.env, null, 2)}`);
+//   core.info("-----------------------------------------");
+//   core.info(`process.env.GITHUB_BASE_REF: ${process.env.GITHUB_BASE_REF}`);
+//   core.info(`process.env.GITHUB_HEAD_REF: ${process.env.GITHUB_HEAD_REF}`);
+//   core.info("-----------------------------------------");
+//   const pullRequest = github.context.payload.pull_request;
+//   if (!pullRequest) return;
+//   const baseSha = pullRequest["base"]["sha"];
+//   const headSha = pullRequest["head"]["sha"];
+//   core.info(`base: ${baseSha}`);
+//   core.info(`head: ${headSha}`);
+//   core.info(`base: ${JSON.stringify(pullRequest["base"], null, 2)}`);
+//   core.info(`head: ${JSON.stringify(pullRequest["head"], null, 2)}`);
+//   core.info("-----------------------------------------");
+//   core.info(JSON.stringify(github.context, null, 2));
+//   core.info("-----------------------------------------");
+// }
+// bha();
 
 
 /***/ }),
