@@ -22,12 +22,12 @@ const execute = (command: string): Promise<string> => {
 const crawl = async (base: string, head: string): Promise<string[][]> => {
   core.info(await execute("git show-ref"));
 
-  const gitSha = await Promise.all([
-    execute(revParseCommand(refNames[0])),
-    execute(revParseCommand(refNames[1]))
-  ]);
+  // const gitSha = await Promise.all([
+  //   execute(revParseCommand(refNames[0])),
+  //   execute(revParseCommand(refNames[1]))
+  // ]);
 
-  core.debug(`gitSha: ${gitSha}`);
+  // core.debug(`gitSha: ${gitSha}`);
 
   const result: string[][] = await Promise.all([
     Promise.all(

@@ -42,7 +42,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.crawl = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const child_process_1 = __nccwpck_require__(3129);
-const refNames = ["refs/remotes/origin/master", "HEAD"];
+const refNames = (/* unused pure expression or super */ null && (["refs/remotes/origin/master", "HEAD"]));
 const configs = ["error", "todo", "import"];
 const revParseCommand = (refName) => `git rev-parse ${refName}`;
 const grepCommand = (predicate, gitSha) => `git grep -E '${predicate}' ${gitSha} | wc -l`;
@@ -58,11 +58,11 @@ const execute = (command) => {
 };
 const crawl = (base, head) => __awaiter(void 0, void 0, void 0, function* () {
     core.info(yield execute("git show-ref"));
-    const gitSha = yield Promise.all([
-        execute(revParseCommand(refNames[0])),
-        execute(revParseCommand(refNames[1]))
-    ]);
-    core.debug(`gitSha: ${gitSha}`);
+    // const gitSha = await Promise.all([
+    //   execute(revParseCommand(refNames[0])),
+    //   execute(revParseCommand(refNames[1]))
+    // ]);
+    // core.debug(`gitSha: ${gitSha}`);
     const result = yield Promise.all([
         Promise.all(configs.map((config) => grepCommand(config, base)).map(execute)),
         Promise.all(configs.map((config) => grepCommand(config, head)).map(execute))
