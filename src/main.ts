@@ -1,31 +1,66 @@
 import * as core from "@actions/core";
-import * as github from "@actions/github";
-import {crawl} from "./crawler";
+// import * as github from "@actions/github";
+// import {crawl} from "./crawler";
+import {execute} from "./utils";
+
+// git init /home/runner/work/tech-debt-checker/tech-debt-checker
+// git remote add origin https://github.com/LeonamAnjos/tech-debt-checker
+
+// git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +8a0e3959d0eea862c0aad21e17bc0401d918948c:refs/remotes/pull/7/merge
+// git checkout --progress --force refs/remotes/pull/7/merge
+
+// git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin master
+// git grep -E 'todo' HEAD
+// git grep -E 'todo' origin/master
 
 async function run(): Promise<void> {
   try {
-    const threshold: string = core.getInput("threshold");
-    const strict: string = core.getInput("strict");
-    const options: string = core.getInput("options");
+    const headRef = "HEAD";
+    const baseRef = process.env.GITHUB_BASE_REF;
 
-    core.info(`Threshold: ${threshold}`);
-    core.info(`Strict: ${strict}`);
-    core.info(`Options: ${options}`);
+    core.info(`headRef: ${headRef}`);
+    core.info(`baseRef: ${baseRef}`);
 
-    const pullRequest = github.context.payload.pull_request;
+    core.info(
+      await execute(
+        `git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin ${baseRef}`
+      )
+    );
 
-    if (!pullRequest) return;
+    const configs = ["error", "todo", "import"];
 
-    const baseSha = pullRequest["base"]["sha"];
-    const headSha = pullRequest["head"]["sha"];
+    for (const c of configs) {
+      core.info(await execute(`git grep -E '${c}' ${headRef}`));
+      core.info(await execute(`git grep -E '${c}' ${baseRef}`));
+    }
 
-    core.info(`base: ${baseSha}`);
-    core.info(`head: ${headSha}`);
+    for (const c of configs) {
+      core.info(await execute(`git grep -E '${c}' ${headRef} | wc -l`));
+      core.info(await execute(`git grep -E '${c}' ${baseRef} | wc -l`));
+    }
 
-    const result = await crawl(baseSha, headSha);
+    // const threshold: string = core.getInput("threshold");
+    // const strict: string = core.getInput("strict");
+    // const options: string = core.getInput("options");
 
-    core.info(`Strict: ${result}`);
-    core.setOutput("Crawler", `${result}`);
+    // core.info(`Threshold: ${threshold}`);
+    // core.info(`Strict: ${strict}`);
+    // core.info(`Options: ${options}`);
+
+    // const pullRequest = github.context.payload.pull_request;
+
+    // if (!pullRequest) return;
+
+    // const baseSha = pullRequest["base"]["sha"];
+    // const headSha = pullRequest["head"]["sha"];
+
+    // core.info(`base: ${baseSha}`);
+    // core.info(`head: ${headSha}`);
+
+    // const result = await crawl(baseSha, headSha);
+
+    // core.info(`Strict: ${result}`);
+    // core.setOutput("Crawler", `${result}`);
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message);
   }

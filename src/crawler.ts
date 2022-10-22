@@ -1,23 +1,12 @@
 import * as core from "@actions/core";
-import {exec} from "child_process";
+import {execute} from "./utils";
 
-const refNames = ["refs/remotes/origin/master", "HEAD"];
+// const refNames = ["refs/remotes/origin/master", "HEAD"];
 const configs = ["error", "todo", "import"];
 
-const revParseCommand = (refName: string): string => `git rev-parse ${refName}`;
+// const revParseCommand = (refName: string): string => `git rev-parse ${refName}`;
 const grepCommand = (predicate: string, gitSha: string): string =>
   `git grep -E '${predicate}' ${gitSha} | wc -l`;
-
-const execute = (command: string): Promise<string> => {
-  return new Promise<string>((resolve, reject) => {
-    core.info(`[Exec] ${command}`);
-    exec(command, (error, stdout) => {
-      if (error) reject(error);
-
-      resolve(stdout.trim());
-    });
-  });
-};
 
 const crawl = async (base: string, head: string): Promise<string[][]> => {
   core.info(await execute("git show-ref"));
