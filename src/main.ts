@@ -21,10 +21,12 @@ async function run(): Promise<void> {
     core.info(`headRef: ${headRef}`);
     core.info(`baseRef: ${baseRef}`);
 
-    core.group("Fetch base", () =>
-      execute(
-        `git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin ${baseRef}`
-      ).then(core.info)
+    core.group(
+      "Fetch base",
+      async () =>
+        await execute(
+          `git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin ${baseRef}`
+        ).then(core.info)
     );
 
     const configs = ["error", "todo", "import"];

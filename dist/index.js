@@ -57,7 +57,9 @@ function run() {
             const baseRef = process.env.GITHUB_BASE_REF;
             core.info(`headRef: ${headRef}`);
             core.info(`baseRef: ${baseRef}`);
-            core.group("Fetch base", () => (0, utils_1.execute)(`git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin ${baseRef}`).then(core.info));
+            core.group("Fetch base", () => __awaiter(this, void 0, void 0, function* () {
+                return yield (0, utils_1.execute)(`git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin ${baseRef}`).then(core.info);
+            }));
             const configs = ["error", "todo", "import"];
             core.startGroup("Grep details");
             for (const c of configs) {
