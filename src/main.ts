@@ -31,12 +31,12 @@ async function run(): Promise<void> {
 
     for (const c of configs) {
       core.info(await execute(`git grep -E '${c}' ${headRef}`));
-      core.info(await execute(`git grep -E '${c}' ${baseRef}`));
+      core.info(await execute(`git grep -E '${c}' origin/${baseRef}`));
     }
 
     for (const c of configs) {
       core.info(await execute(`git grep -E '${c}' ${headRef} | wc -l`));
-      core.info(await execute(`git grep -E '${c}' ${baseRef} | wc -l`));
+      core.info(await execute(`git grep -E '${c}' origin/${baseRef} | wc -l`));
     }
 
     // const threshold: string = core.getInput("threshold");
