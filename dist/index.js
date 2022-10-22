@@ -50,6 +50,17 @@ const utils_1 = __nccwpck_require__(918);
 // git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin master
 // git grep -E 'todo' HEAD
 // git grep -E 'todo' origin/master
+const configs = ["error", "todo", "import"];
+function grepDetails(headRef, baseRef) {
+    return __awaiter(this, void 0, void 0, function* () {
+        core.startGroup("Grep details");
+        for (const c of configs) {
+            core.info(yield (0, utils_1.execute)(`git grep -E '${c}' ${headRef}`));
+            core.info(yield (0, utils_1.execute)(`git grep -E '${c}' origin/${baseRef}`));
+        }
+        core.endGroup();
+    });
+}
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -57,22 +68,33 @@ function run() {
             const baseRef = process.env.GITHUB_BASE_REF;
             core.info(`headRef: ${headRef}`);
             core.info(`baseRef: ${baseRef}`);
-            core.group("Fetch base", () => __awaiter(this, void 0, void 0, function* () {
-                return yield (0, utils_1.execute)(`git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin ${baseRef}`).then(core.info);
-            }));
-            const configs = ["error", "todo", "import"];
-            core.startGroup("Grep details");
-            for (const c of configs) {
-                core.info(yield (0, utils_1.execute)(`git grep -E '${c}' ${headRef}`));
-                core.info(yield (0, utils_1.execute)(`git grep -E '${c}' origin/${baseRef}`));
+            const grepCount = [
+                yield core.group("Grep count HEAD", () => Promise.all(configs.map((c) => (0, utils_1.execute)(`git grep -E '${c}' ${headRef} | wc -l`))))
+            ];
+            if (baseRef) {
+                grepCount.push(yield core.group(`Grep count ${baseRef}`, () => (0, utils_1.execute)(`git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin ${baseRef}`)
+                    .then(core.info)
+                    .then(() => Promise.all(configs.map((c) => (0, utils_1.execute)(`git grep -E '${c}' origin/${baseRef} | wc -l`))))));
             }
-            core.endGroup();
+            // await grepDetails(headRef, baseRef);
             core.startGroup("Grep count");
-            const result = yield Promise.all([
-                Promise.all(configs.map((c) => (0, utils_1.execute)(`git grep -E '${c}' ${headRef} | wc -l`))),
-                Promise.all(configs.map((c) => (0, utils_1.execute)(`git grep -E '${c}' origin/${baseRef} | wc -l`)))
-            ]);
-            core.info(JSON.stringify(result));
+            core.info(JSON.stringify(grepCount));
+            core.endGroup();
+            core.startGroup("Report");
+            const rows = [
+                "### Tech-debt Report",
+                `| | ${baseRef} | ${headRef} | Diff | |`,
+                "| --- | --- | --- | --- | --- |"
+            ];
+            for (let i = 0; i < configs.length; i++) {
+                const base = +grepCount[0][i];
+                const head = +grepCount[1][i];
+                const diff = head - base;
+                const sign = diff > 0 ? "+" : "";
+                const icon = diff < 0 ? "✅" : diff > 0 ? "⚠️" : "☑️";
+                rows.push(`| **${configs[i]}** | ${base} | ${head} | \`${sign}${diff}\` | ${icon} |`);
+            }
+            core.info(rows.join("\n"));
             core.endGroup();
             // for (const c of configs) {
             //   core.info(await execute(`git grep -E '${c}' ${headRef} | wc -l`));

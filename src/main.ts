@@ -13,6 +13,17 @@ import {execute} from "./utils";
 // git grep -E 'todo' HEAD
 // git grep -E 'todo' origin/master
 
+const configs = ["error", "todo", "import"];
+
+async function grepDetails(headRef: string, baseRef: string): Promise<void> {
+  core.startGroup("Grep details");
+  for (const c of configs) {
+    core.info(await execute(`git grep -E '${c}' ${headRef}`));
+    core.info(await execute(`git grep -E '${c}' origin/${baseRef}`));
+  }
+  core.endGroup();
+}
+
 async function run(): Promise<void> {
   try {
     const headRef = "HEAD";
@@ -21,37 +32,62 @@ async function run(): Promise<void> {
     core.info(`headRef: ${headRef}`);
     core.info(`baseRef: ${baseRef}`);
 
-    core.group(
-      "Fetch base",
-      async () =>
-        await execute(
-          `git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin ${baseRef}`
-        ).then(core.info)
-    );
-
-    const configs = ["error", "todo", "import"];
-
-    core.startGroup("Grep details");
-    for (const c of configs) {
-      core.info(await execute(`git grep -E '${c}' ${headRef}`));
-      core.info(await execute(`git grep -E '${c}' origin/${baseRef}`));
-    }
-    core.endGroup();
-
-    core.startGroup("Grep count");
-    const result: string[][] = await Promise.all([
-      Promise.all(
-        configs.map((c: string) =>
-          execute(`git grep -E '${c}' ${headRef} | wc -l`)
-        )
-      ),
-      Promise.all(
-        configs.map((c: string) =>
-          execute(`git grep -E '${c}' origin/${baseRef} | wc -l`)
+    const grepCount: string[][] = [
+      await core.group("Grep count HEAD", () =>
+        Promise.all(
+          configs.map((c: string) =>
+            execute(`git grep -E '${c}' ${headRef} | wc -l`)
+          )
         )
       )
-    ]);
-    core.info(JSON.stringify(result));
+    ];
+
+    if (baseRef) {
+      grepCount.push(
+        await core.group(`Grep count ${baseRef}`, () =>
+          execute(
+            `git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin ${baseRef}`
+          )
+            .then(core.info)
+            .then(() =>
+              Promise.all(
+                configs.map((c: string) =>
+                  execute(`git grep -E '${c}' origin/${baseRef} | wc -l`)
+                )
+              )
+            )
+        )
+      );
+    }
+
+    // await grepDetails(headRef, baseRef);
+
+    core.startGroup("Grep count");
+    core.info(JSON.stringify(grepCount));
+    core.endGroup();
+
+    core.startGroup("Report");
+
+    const rows: string[] = [
+      "### Tech-debt Report",
+      `| | ${baseRef} | ${headRef} | Diff | |`,
+      "| --- | --- | --- | --- | --- |"
+    ];
+
+    for (let i = 0; i < configs.length; i++) {
+      const base = +grepCount[0][i];
+      const head = +grepCount[1][i];
+      const diff = head - base;
+      const sign = diff > 0 ? "+" : "";
+      const icon = diff < 0 ? "✅" : diff > 0 ? "⚠️" : "☑️";
+
+      rows.push(
+        `| **${configs[i]}** | ${base} | ${head} | \`${sign}${diff}\` | ${icon} |`
+      );
+    }
+
+    core.info(rows.join("\n"));
+
     core.endGroup();
 
     // for (const c of configs) {
