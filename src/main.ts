@@ -21,23 +21,41 @@ async function run(): Promise<void> {
     core.info(`headRef: ${headRef}`);
     core.info(`baseRef: ${baseRef}`);
 
-    core.info(
-      await execute(
+    core.group("Fetch base", () =>
+      execute(
         `git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin ${baseRef}`
-      )
+      ).then(core.info)
     );
 
     const configs = ["error", "todo", "import"];
 
+    core.startGroup("Grep details");
     for (const c of configs) {
       core.info(await execute(`git grep -E '${c}' ${headRef}`));
       core.info(await execute(`git grep -E '${c}' origin/${baseRef}`));
     }
+    core.endGroup();
 
-    for (const c of configs) {
-      core.info(await execute(`git grep -E '${c}' ${headRef} | wc -l`));
-      core.info(await execute(`git grep -E '${c}' origin/${baseRef} | wc -l`));
-    }
+    core.startGroup("Grep count");
+    const result: string[][] = await Promise.all([
+      Promise.all(
+        configs.map((c: string) =>
+          execute(`git grep -E '${c}' ${headRef} | wc -l`)
+        )
+      ),
+      Promise.all(
+        configs.map((c: string) =>
+          execute(`git grep -E '${c}' origin/${baseRef} | wc -l`)
+        )
+      )
+    ]);
+    core.info(JSON.stringify(result));
+    core.endGroup();
+
+    // for (const c of configs) {
+    //   core.info(await execute(`git grep -E '${c}' ${headRef} | wc -l`));
+    //   core.info(await execute(`git grep -E '${c}' origin/${baseRef} | wc -l`));
+    // }
 
     // const threshold: string = core.getInput("threshold");
     // const strict: string = core.getInput("strict");

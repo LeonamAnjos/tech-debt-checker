@@ -57,16 +57,25 @@ function run() {
             const baseRef = process.env.GITHUB_BASE_REF;
             core.info(`headRef: ${headRef}`);
             core.info(`baseRef: ${baseRef}`);
-            core.info(yield (0, utils_1.execute)(`git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin ${baseRef}`));
+            core.group("Fetch base", () => (0, utils_1.execute)(`git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin ${baseRef}`).then(core.info));
             const configs = ["error", "todo", "import"];
+            core.startGroup("Grep details");
             for (const c of configs) {
                 core.info(yield (0, utils_1.execute)(`git grep -E '${c}' ${headRef}`));
                 core.info(yield (0, utils_1.execute)(`git grep -E '${c}' origin/${baseRef}`));
             }
-            for (const c of configs) {
-                core.info(yield (0, utils_1.execute)(`git grep -E '${c}' ${headRef} | wc -l`));
-                core.info(yield (0, utils_1.execute)(`git grep -E '${c}' origin/${baseRef} | wc -l`));
-            }
+            core.endGroup();
+            core.startGroup("Grep count");
+            const result = yield Promise.all([
+                Promise.all(configs.map((c) => (0, utils_1.execute)(`git grep -E '${c}' ${headRef} | wc -l`))),
+                Promise.all(configs.map((c) => (0, utils_1.execute)(`git grep -E '${c}' origin/${baseRef} | wc -l`)))
+            ]);
+            core.info(JSON.stringify(result));
+            core.endGroup();
+            // for (const c of configs) {
+            //   core.info(await execute(`git grep -E '${c}' ${headRef} | wc -l`));
+            //   core.info(await execute(`git grep -E '${c}' origin/${baseRef} | wc -l`));
+            // }
             // const threshold: string = core.getInput("threshold");
             // const strict: string = core.getInput("strict");
             // const options: string = core.getInput("options");
