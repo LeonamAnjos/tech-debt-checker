@@ -2,7 +2,7 @@ name: 'build-test'
 on: # rebuild any PRs and main branch changes
   pull_request:
   push:
-    branches:
+    branches-ignore:
       - master
 
 jobs:
@@ -23,3 +23,5 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           strict: true
           threshold: "30"
+          patterns: "TODO \n eslint-disable \n eslint-disable.*security/"
+

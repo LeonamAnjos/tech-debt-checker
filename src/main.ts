@@ -1,40 +1,129 @@
 import * as core from "@actions/core";
-import * as github from "@actions/github";
-import {crawl} from "./crawler";
+// import * as github from "@actions/github";
+// import {crawl} from "./crawler";
+import {execute} from "./utils";
+
+// git init /home/runner/work/tech-debt-checker/tech-debt-checker
+// git remote add origin https://github.com/LeonamAnjos/tech-debt-checker
+
+// git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +8a0e3959d0eea862c0aad21e17bc0401d918948c:refs/remotes/pull/7/merge
+// git checkout --progress --force refs/remotes/pull/7/merge
+
+// git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin master
+// git grep -E 'todo' HEAD
+// git grep -E 'todo' origin/master
+
+// async function grepDetails(headRef: string, baseRef: string): Promise<void> {
+//   core.startGroup("Grep details");
+//   for (const c of configs) {
+//     core.info(await execute(`git grep -E '${c}' ${headRef}`));
+//     core.info(await execute(`git grep -E '${c}' origin/${baseRef}`));
+//   }
+//   core.endGroup();
+// }
 
 async function run(): Promise<void> {
   try {
-    const threshold: string = core.getInput("threshold");
-    const strict: string = core.getInput("strict");
+    const headRef = "HEAD";
+    const baseRef = process.env.GITHUB_BASE_REF;
+    const patterns = core.getMultilineInput("patterns", {
+      required: true,
+      trimWhitespace: true
+    });
+    const pathspec = core.getInput("pathspec");
 
-    // core.info(`GITHUB_BASE_REF: ${process.env["GITHUB_BASE_REF"]}`);
-    // core.info(`GITHUB_HEAD_REF: ${process.env["GITHUB_HEAD_REF"]}`);
-    // core.info(`GITHUB_REF: ${process.env["GITHUB_REF"]}`);
+    core.info(`headRef: ${headRef}`);
+    core.info(`baseRef: ${baseRef}`);
+    core.info(`patterns: ${patterns.join("|")}`);
+    core.info(`pathspec: ${pathspec}`);
 
-    core.info(`GITHUB_SHA: ${process.env["GITHUB_SHA"]}`);
-    core.info(`${github.context.sha}: github.context.sha`);
-    core.info(`${github.context.payload.pull_request}: github.context.sha`);
-    core.info(
-      `${github.context.payload["after"]}: github.context.payload["after"]`
-    );
-    core.info(
-      `${github.context.payload["before"]}: github.context.payload["before"]`
-    );
+    const grepCount: string[][] = [
+      await core.group("Grep count HEAD", () =>
+        Promise.all(
+          patterns.map((c: string) =>
+            execute(`git grep -h -o '${c}' ${headRef} -- ${pathspec} | wc -l`)
+          )
+        )
+      )
+    ];
 
-    core.info(JSON.stringify(github.context, null, 2));
+    if (baseRef) {
+      grepCount.push(
+        await core.group(`Grep count ${baseRef}`, () =>
+          execute(
+            `git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin ${baseRef}`
+          )
+            .then(core.info)
+            .then(() =>
+              Promise.all(
+                patterns.map((c: string) =>
+                  execute(`git grep -E '${c}' origin/${baseRef} | wc -l`)
+                )
+              )
+            )
+        )
+      );
+    }
 
-    core.info(`Threshold: ${threshold}`);
-    core.info(`Strict: ${strict}`);
+    core.startGroup("Grep count");
+    core.info(JSON.stringify(grepCount));
+    core.endGroup();
 
-    const result = await crawl();
+    core.startGroup("Report");
 
-    core.info(`Strict: ${result}`);
-    core.setOutput("Crawler", `${result}`);
+    const rows: string[] = [
+      "### Tech-debt Report",
+      `| | ${baseRef} | ${headRef} | Diff | |`,
+      "| --- | --- | --- | --- | --- |"
+    ];
 
-    // core.setOutput("time", new Date().toTimeString());
+    for (let i = 0; i < patterns.length; i++) {
+      const base = +grepCount[0][i];
+      const head = +grepCount[1][i];
+      const diff = head - base;
+      const sign = diff > 0 ? "+" : "";
+      const icon = diff < 0 ? "✅" : diff > 0 ? "⚠️" : "☑️";
+
+      rows.push(
+        `| **${patterns[i]}** | ${base} | ${head} | \`${sign}${diff}\` | ${icon} |`
+      );
+    }
+
+    core.info(rows.join("\n"));
+    core.endGroup();
   } catch (error) {
-    if (error instanceof Error) core.setFailed(error.message);
+    const message = error instanceof Error ? error.message : `${error}`;
+
+    core.setFailed(message);
   }
 }
 
 run();
+
+// async function bha(): Promise<void> {
+//   core.info(`env: ${JSON.stringify(process.env, null, 2)}`);
+//   core.info("-----------------------------------------");
+
+//   core.info(`process.env.GITHUB_BASE_REF: ${process.env.GITHUB_BASE_REF}`);
+//   core.info(`process.env.GITHUB_HEAD_REF: ${process.env.GITHUB_HEAD_REF}`);
+//   core.info("-----------------------------------------");
+
+//   const pullRequest = github.context.payload.pull_request;
+
+//   if (!pullRequest) return;
+
+//   const baseSha = pullRequest["base"]["sha"];
+//   const headSha = pullRequest["head"]["sha"];
+
+//   core.info(`base: ${baseSha}`);
+//   core.info(`head: ${headSha}`);
+
+//   core.info(`base: ${JSON.stringify(pullRequest["base"], null, 2)}`);
+//   core.info(`head: ${JSON.stringify(pullRequest["head"], null, 2)}`);
+
+//   core.info("-----------------------------------------");
+//   core.info(JSON.stringify(github.context, null, 2));
+//   core.info("-----------------------------------------");
+// }
+
+// bha();
