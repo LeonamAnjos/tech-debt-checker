@@ -67,11 +67,13 @@ function run() {
                 required: true,
                 trimWhitespace: true
             });
+            const pathspec = core.getInput("pathspec");
             core.info(`headRef: ${headRef}`);
             core.info(`baseRef: ${baseRef}`);
-            core.info(patterns.join("|"));
+            core.info(`patterns: ${patterns.join("|")}`);
+            core.info(`pathspec: ${pathspec}`);
             const grepCount = [
-                yield core.group("Grep count HEAD", () => Promise.all(patterns.map((c) => (0, utils_1.execute)(`git grep -E '${c}' ${headRef} | wc -l`))))
+                yield core.group("Grep count HEAD", () => Promise.all(patterns.map((c) => (0, utils_1.execute)(`git grep -h -o '${c}' ${headRef} -- ${pathspec} | wc -l`))))
             ];
             if (baseRef) {
                 grepCount.push(yield core.group(`Grep count ${baseRef}`, () => (0, utils_1.execute)(`git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin ${baseRef}`)

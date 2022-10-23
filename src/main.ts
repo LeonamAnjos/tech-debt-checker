@@ -30,16 +30,18 @@ async function run(): Promise<void> {
       required: true,
       trimWhitespace: true
     });
+    const pathspec = core.getInput("pathspec");
 
     core.info(`headRef: ${headRef}`);
     core.info(`baseRef: ${baseRef}`);
-    core.info(patterns.join("|"));
+    core.info(`patterns: ${patterns.join("|")}`);
+    core.info(`pathspec: ${pathspec}`);
 
     const grepCount: string[][] = [
       await core.group("Grep count HEAD", () =>
         Promise.all(
           patterns.map((c: string) =>
-            execute(`git grep -E '${c}' ${headRef} | wc -l`)
+            execute(`git grep -h -o '${c}' ${headRef} -- ${pathspec} | wc -l`)
           )
         )
       )

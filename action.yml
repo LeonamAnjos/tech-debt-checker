@@ -14,6 +14,10 @@ inputs:
     description: "List of patterns separated by newline character"
     required: true
     default: "TODO"
+  pathspec:
+    description: "Path to be inspected"
+    required: true
+    default: "./"
 runs:
   using: "node16"
   main: "dist/index.js"
