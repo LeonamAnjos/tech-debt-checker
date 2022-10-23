@@ -10,9 +10,10 @@ inputs:
   threshold:
     description: "Maximum number of new tech-debts that can be added"
     default: "0"
-  options:
-    description: "Bha"
+  patterns:
+    description: "List of patterns separated by newline character"
     required: true
+    default: "TODO"
 runs:
   using: "node16"
   main: "dist/index.js"

@@ -50,7 +50,6 @@ const utils_1 = __nccwpck_require__(918);
 // git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin master
 // git grep -E 'todo' HEAD
 // git grep -E 'todo' origin/master
-const staticConfigs = ["TODO", "eslint-disable"];
 // async function grepDetails(headRef: string, baseRef: string): Promise<void> {
 //   core.startGroup("Grep details");
 //   for (const c of configs) {
@@ -62,25 +61,23 @@ const staticConfigs = ["TODO", "eslint-disable"];
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const options = core.getMultilineInput("options", {
+            const headRef = "HEAD";
+            const baseRef = process.env.GITHUB_BASE_REF;
+            const patterns = core.getMultilineInput("patterns", {
                 required: true,
                 trimWhitespace: true
             });
-            const configs = options.length > 0 ? options : staticConfigs;
-            core.info(configs.join("|"));
-            const headRef = "HEAD";
-            const baseRef = process.env.GITHUB_BASE_REF;
             core.info(`headRef: ${headRef}`);
             core.info(`baseRef: ${baseRef}`);
+            core.info(patterns.join("|"));
             const grepCount = [
-                yield core.group("Grep count HEAD", () => Promise.all(configs.map((c) => (0, utils_1.execute)(`git grep -E '${c}' ${headRef} | wc -l`))))
+                yield core.group("Grep count HEAD", () => Promise.all(patterns.map((c) => (0, utils_1.execute)(`git grep -E '${c}' ${headRef} | wc -l`))))
             ];
             if (baseRef) {
                 grepCount.push(yield core.group(`Grep count ${baseRef}`, () => (0, utils_1.execute)(`git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin ${baseRef}`)
                     .then(core.info)
-                    .then(() => Promise.all(configs.map((c) => (0, utils_1.execute)(`git grep -E '${c}' origin/${baseRef} | wc -l`))))));
+                    .then(() => Promise.all(patterns.map((c) => (0, utils_1.execute)(`git grep -E '${c}' origin/${baseRef} | wc -l`))))));
             }
-            // await grepDetails(headRef, baseRef);
             core.startGroup("Grep count");
             core.info(JSON.stringify(grepCount));
             core.endGroup();
@@ -90,39 +87,20 @@ function run() {
                 `| | ${baseRef} | ${headRef} | Diff | |`,
                 "| --- | --- | --- | --- | --- |"
             ];
-            for (let i = 0; i < configs.length; i++) {
+            for (let i = 0; i < patterns.length; i++) {
                 const base = +grepCount[0][i];
                 const head = +grepCount[1][i];
                 const diff = head - base;
                 const sign = diff > 0 ? "+" : "";
                 const icon = diff < 0 ? "✅" : diff > 0 ? "⚠️" : "☑️";
-                rows.push(`| **${configs[i]}** | ${base} | ${head} | \`${sign}${diff}\` | ${icon} |`);
+                rows.push(`| **${patterns[i]}** | ${base} | ${head} | \`${sign}${diff}\` | ${icon} |`);
             }
             core.info(rows.join("\n"));
             core.endGroup();
-            // for (const c of configs) {
-            //   core.info(await execute(`git grep -E '${c}' ${headRef} | wc -l`));
-            //   core.info(await execute(`git grep -E '${c}' origin/${baseRef} | wc -l`));
-            // }
-            // const threshold: string = core.getInput("threshold");
-            // const strict: string = core.getInput("strict");
-            // const options: string = core.getInput("options");
-            // core.info(`Threshold: ${threshold}`);
-            // core.info(`Strict: ${strict}`);
-            // core.info(`Options: ${options}`);
-            // const pullRequest = github.context.payload.pull_request;
-            // if (!pullRequest) return;
-            // const baseSha = pullRequest["base"]["sha"];
-            // const headSha = pullRequest["head"]["sha"];
-            // core.info(`base: ${baseSha}`);
-            // core.info(`head: ${headSha}`);
-            // const result = await crawl(baseSha, headSha);
-            // core.info(`Strict: ${result}`);
-            // core.setOutput("Crawler", `${result}`);
         }
         catch (error) {
-            if (error instanceof Error)
-                core.setFailed(error.message);
+            const message = error instanceof Error ? error.message : `${error}`;
+            core.setFailed(message);
         }
     });
 }
