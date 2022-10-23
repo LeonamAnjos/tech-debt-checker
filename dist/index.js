@@ -50,20 +50,24 @@ const utils_1 = __nccwpck_require__(918);
 // git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin master
 // git grep -E 'todo' HEAD
 // git grep -E 'todo' origin/master
-const configs = ["error", "todo", "import"];
-function grepDetails(headRef, baseRef) {
-    return __awaiter(this, void 0, void 0, function* () {
-        core.startGroup("Grep details");
-        for (const c of configs) {
-            core.info(yield (0, utils_1.execute)(`git grep -E '${c}' ${headRef}`));
-            core.info(yield (0, utils_1.execute)(`git grep -E '${c}' origin/${baseRef}`));
-        }
-        core.endGroup();
-    });
-}
+const staticConfigs = ["TODO", "eslint-disable"];
+// async function grepDetails(headRef: string, baseRef: string): Promise<void> {
+//   core.startGroup("Grep details");
+//   for (const c of configs) {
+//     core.info(await execute(`git grep -E '${c}' ${headRef}`));
+//     core.info(await execute(`git grep -E '${c}' origin/${baseRef}`));
+//   }
+//   core.endGroup();
+// }
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            const options = core.getMultilineInput("options", {
+                required: true,
+                trimWhitespace: true
+            });
+            const configs = options.length > 0 ? options : staticConfigs;
+            core.info(configs.join("|"));
             const headRef = "HEAD";
             const baseRef = process.env.GITHUB_BASE_REF;
             core.info(`headRef: ${headRef}`);

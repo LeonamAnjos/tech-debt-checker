@@ -23,4 +23,4 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           strict: true
           threshold: "30"
-          options: x|y|z
+          options: "TODO \n eslint-disable \n eslint-disable.*security/"

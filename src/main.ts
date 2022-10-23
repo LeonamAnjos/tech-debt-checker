@@ -13,19 +13,26 @@ import {execute} from "./utils";
 // git grep -E 'todo' HEAD
 // git grep -E 'todo' origin/master
 
-const configs = ["error", "todo", "import"];
+const staticConfigs = ["TODO", "eslint-disable"];
 
-async function grepDetails(headRef: string, baseRef: string): Promise<void> {
-  core.startGroup("Grep details");
-  for (const c of configs) {
-    core.info(await execute(`git grep -E '${c}' ${headRef}`));
-    core.info(await execute(`git grep -E '${c}' origin/${baseRef}`));
-  }
-  core.endGroup();
-}
+// async function grepDetails(headRef: string, baseRef: string): Promise<void> {
+//   core.startGroup("Grep details");
+//   for (const c of configs) {
+//     core.info(await execute(`git grep -E '${c}' ${headRef}`));
+//     core.info(await execute(`git grep -E '${c}' origin/${baseRef}`));
+//   }
+//   core.endGroup();
+// }
 
 async function run(): Promise<void> {
   try {
+    const options = core.getMultilineInput("options", {
+      required: true,
+      trimWhitespace: true
+    });
+    const configs = options.length > 0 ? options : staticConfigs;
+    core.info(configs.join("|"));
+
     const headRef = "HEAD";
     const baseRef = process.env.GITHUB_BASE_REF;
 

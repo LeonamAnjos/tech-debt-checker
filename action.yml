@@ -6,9 +6,13 @@ inputs:
     required: true
   strict:
     description: "Should block if threshold does not pass?"
+    default: "false"
   threshold:
     description: "Maximum number of new tech-debts that can be added"
     default: "0"
+  options:
+    description: "Bha"
+    required: true
 runs:
   using: "node16"
   main: "dist/index.js"
